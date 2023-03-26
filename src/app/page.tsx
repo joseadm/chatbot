@@ -1,90 +1,117 @@
+'use client'
+
+import React, { useState } from 'react'
+import axios from 'axios'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from './page.module.css'
+import {
+  Container,
+  Row,
+  Col,
+  InputGroup,
+  FormControl,
+  Button,
+} from 'react-bootstrap'
+
+const API_KEY = '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'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
+  const [messages, setMessages] = useState<any[]>([])
+  const [inputValue, setInputValue] = useState<any>('')
+
+  const sendMessage = async () => {
+    if (!inputValue) {
+      return
+    }
+
+    // add user message to message history
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { message: inputValue, author: 'user' },
+    ])
+
+    // send user message to ChatGPT API
+    try {
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: inputValue }],
+          temperature: 0.7,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${API_KEY}`,
+          },
+        },
+      )
+
+      // add ChatGPT response to message history
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          message: response.data.choices[0].message.content,
+          author: 'chatbot',
+        },
+      ])
+    } catch (error) {
+      console.error(error)
+    }
+
+    // clear input field
+    setInputValue('')
+  }
+
   return (
     <main className={styles.main}>
       <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+        <Container className="border rounded shadow-sm mt-5 mb-5">
+          <Row className="align-items-center py-3 px-2">
+            <Col xs={2} className="text-center">
+              <p>Persona</p>
+            </Col>
+            <Col xs={10}>
+              <h5 className="m-0">Chatbot</h5>
+            </Col>
+          </Row>
+          <div className="bg-white p-3">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`mb-3 ${
+                  message.author === 'user' ? 'text-end' : ''
+                }`}
+              >
+                <div
+                  className={`rounded p-2 ${
+                    message.author === 'user'
+                      ? 'bg-primary text-white'
+                      : 'bg-light'
+                  }`}
+                >
+                  {message.message}
+                </div>
+              </div>
+            ))}
+            <InputGroup className="mb-3">
+              <FormControl
+                placeholder="Type your message here"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+              />
+              <Button variant="primary" onClick={sendMessage}>
+                Record
+              </Button>
+              <Button variant="primary" onClick={sendMessage}>
+                Send
+              </Button>
+            </InputGroup>
+          </div>
+        </Container>
       </div>
     </main>
   )
