@@ -14,8 +14,6 @@ import {
   Button,
 } from 'react-bootstrap'
 
-const API_KEY = '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'
-
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
@@ -45,7 +43,7 @@ export default function Home() {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${API_KEY}`,
+            Authorization: `Bearer ${process.env.API_KEY}`,
           },
         },
       )
