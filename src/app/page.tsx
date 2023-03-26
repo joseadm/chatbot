@@ -69,9 +69,6 @@ export default function Home() {
       <div className={styles.description}>
         <Container className="border rounded shadow-sm mt-5 mb-5">
           <Row className="align-items-center py-3 px-2">
-            <Col xs={2} className="text-center">
-              <p>Persona</p>
-            </Col>
             <Col xs={10}>
               <h5 className="m-0">Chatbot</h5>
             </Col>
